@@ -1,0 +1,18 @@
+name: ARC Self-Hosted Runner Test
+on:
+  workflow_dispatch:
+
+jobs:
+  test-runner:
+    # Must match the INSTALLATION_NAME from Step 3
+    runs-on: arc-runner-set
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Hello from ARC
+        run: |
+          echo "🎉 Running on a self-hosted ARC runner!"
+          echo "Hostname: $(hostname)"
+          echo "OS: $(uname -a)"
+          echo "Runner: $RUNNER_NAME"
