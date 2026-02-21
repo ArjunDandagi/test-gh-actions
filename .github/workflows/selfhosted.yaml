@@ -17,6 +17,5 @@ jobs:
           echo "OS: $(uname -a)"
           echo "Runner: $RUNNER_NAME"
           nproc
-          df -Th
-          ls -lrth
+          cat /etc/os-release
           
