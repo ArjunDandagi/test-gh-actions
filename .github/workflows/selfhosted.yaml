@@ -16,3 +16,7 @@ jobs:
           echo "Hostname: $(hostname)"
           echo "OS: $(uname -a)"
           echo "Runner: $RUNNER_NAME"
+          nproc
+          df -Th
+          ls -lrth
+          
