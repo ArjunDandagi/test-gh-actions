@@ -1,21 +1,61 @@
-name: ARC Self-Hosted Runner Test
+name: Inspect Runner Image
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+  workflow_dispatch: 
 
 jobs:
-  test-runner:
-    # Must match the INSTALLATION_NAME from Step 3
+  inspect:
     runs-on: arc-runner-set
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Hello from ARC
+      - name: OS and base info
         run: |
-          echo "🎉 Running on a self-hosted ARC runner!"
-          echo "Hostname: $(hostname)"
-          echo "OS: $(uname -a)"
-          echo "Runner: $RUNNER_NAME"
-          nproc
+          echo "========== OS =========="
           cat /etc/os-release
-          
+          uname -a
+
+          echo "========== User =========="
+          whoami
+          id
+
+      - name: Installed packages (dpkg)
+        run: |
+          echo "========== All installed packages =========="
+          dpkg -l | tail -n +6 | awk '{print $2, $3}' | sort
+
+      - name: Check common CLI tools
+        run: |
+          echo "========== Tool versions =========="
+          for cmd in git curl wget jq zip unzip tar sudo bash \
+                     python3 pip3 node npm npx go java javac \
+                     docker kubectl helm terraform packer \
+                     az aws gcloud ruby gem gcc g++ make cmake \
+                     rustc cargo dotnet php composer; do
+            if command -v "$cmd" &>/dev/null; then
+              echo "✅ $cmd → $($cmd --version 2>&1 | head -1)"
+            else
+              echo "❌ $cmd → NOT INSTALLED"
+            fi
+          done
+
+      - name: PATH and env
+        run: |
+          echo "========== PATH =========="
+          echo "$PATH" | tr ':' '\n'
+
+          echo "========== Key env vars =========="
+          env | grep -iE 'runner|github|home|path|lang' | sort
+
+      - name: Disk usage
+        run: |
+          echo "========== Image size =========="
+          df -h /
+          echo ""
+          du -sh /home/runner/ 2>/dev/null || true
+          du -sh /usr/local/ 2>/dev/null || true
+
+      - name: All binaries in PATH
+        run: |
+          echo "========== Every binary available =========="
+          compgen -c | sort -u
